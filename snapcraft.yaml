@@ -13,7 +13,7 @@ apps:
     stop-command: solr.wrapper stop
     daemon: forking
     restart-condition: always
-    plugs: [network, network-bind]
+    plugs: [network, network-bind, system-observe]
 
   ### UCOMMENT next code and comment above one to start as simple daemon instead of forking one
   # solr:
@@ -37,3 +37,5 @@ parts:
   solr-wrapper:
     plugin: dump
     source: solr
+    organize:
+      'solr': bin/
