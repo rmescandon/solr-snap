@@ -1,0 +1,39 @@
+name: solr
+version: 0.1
+summary: Starts up solr as forking daemon
+description: |
+  Solr server as forking daemon Poc
+
+grade: stable # must be 'stable' to release into candidate/stable channels
+confinement: strict # use 'strict' once you have the right plugs and slots
+
+apps:
+  solr:
+    command: solr.wrapper start
+    stop-command: solr.wrapper stop
+    daemon: forking
+    restart-condition: always
+    plugs: [network, network-bind]
+
+  ### UCOMMENT next code and comment above one to start as simple daemon instead of forking one
+  # solr:
+  #   command: solr.wrapper start -f
+  #   daemon: simple
+  #   restart-condition: always
+  #   plugs: [network, network-bind, system-observe]
+
+parts:
+  solr:
+    plugin: dump
+    source: http://apache.rediris.es/lucene/solr/6.3.0/solr-6.3.0.tgz
+    stage-packages: 
+      - default-jre-headless
+      - lsof
+    snap:
+      - -*.txt
+      - -example
+      - -docs
+
+  solr-wrapper:
+    plugin: dump
+    source: solr
