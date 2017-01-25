@@ -2,10 +2,10 @@ name: solr
 version: 0.1
 summary: Starts up solr as forking daemon
 description: |
-  Solr server as forking daemon Poc
-
-grade: stable # must be 'stable' to release into candidate/stable channels
-confinement: strict # use 'strict' once you have the right plugs and slots
+  Solr server as forking daemon. Additionally exposes app to configure Solr 
+  for nextant use from nextcloud to perform searches
+grade: stable
+confinement: strict
 
 apps:
   solr:
@@ -17,6 +17,7 @@ apps:
 
   configure-nextant:
     command: configure-nextant
+    plugs: [network, network-bind]
 
 parts:
   solr:
@@ -28,13 +29,13 @@ parts:
       - -*.txt
       - -example
       - -docs
-      - -bin/solr
-      - -bin/solr.in.sh
+      - -bin/solr*
+      - -bin/install_solr_service.sh
+      - -bin/init.d
 
   solr-customizations:
     plugin: dump
     source: scripts
     organize:
+      '*': bin/
       'custom-solr': bin/solr
-      'solr-server': bin/solr-server
-      'solr.in.sh' : bin/solr.in.sh

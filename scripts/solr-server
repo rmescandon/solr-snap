@@ -1,7 +1,6 @@
 #!/bin/sh
 
 set -e
-set -x
 
 #evaluate input params. Default is "start"
 cmd="$1"
@@ -28,7 +27,7 @@ case "$cmd" in
 		$SNAP/bin/solr start -force #forces start as root if needed
 	;;
 	"stop" | "restart")
-		$SNAP/$PRODUCT/bin/solr $cmd -force
+		$SNAP/bin/solr $cmd -force
 	;;
 	*)
 esac

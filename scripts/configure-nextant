@@ -1,27 +1,61 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
-set -x
+
+#
+# -e to enable suggested words while searching
+# -d deletes current core
+#
 
 PRODUCT=nextant
 
-# using .nextant_configured file in current snap version data to know if this is first execution
-# and thus it is needed to configure the solr home folder. This will be also executed
-# in case a previous first execution didn't finish projperly
-if [ ! -e $SNAP_DATA/.nextant_configured ]; then
-	# copy configset for nextant to common folder before creating the core in server
-	[ -e $SNAP_DATA/$PRODUCT ]	||	cp -rf $SNAP/server/solr/configsets/basic_configs $SNAP_DATA/$PRODUCT
+JAVA_HOME="$SNAP/usr/lib/jvm/default-java"
+export JAVA_HOME
+export PATH=$PATH:$JAVA_HOME/bin
 
-	# create nextant core
+function print_usage() {
+	echo ""
+    echo "Usage: solr.configure-nextant $OPTIONS"
+    echo "		where OPTIONS is one or several of"
+    echo ""
+    echo "  -c          Creates Solr core to index nextcloud documents"
+    echo ""
+    echo "  -d 			Deletes Solr core to index nextcloud documents"
+    echo ""
+    echo "  -h 			Shows help"
+    echo ""
+    echo "  -s 			Enables suggested words while searching in nextcloud UI"
+   	echo ""
+}
+
+function create_core() {
+	# copy configset for nextant to common folder before creating the core in server
+	[ -e $SNAP_DATA/$PRODUCT ]	||	cp -rf $SNAP/server/solr/configsets/basic_configs $SNAP_DATA/$PRODUCT	
 	$SNAP/bin/solr create -c $PRODUCT -force
+}
+
+function delete_core() {
+	if [ -e $SNAP_DATA/$PRODUCT ]; then
+		$SNAP/bin/solr delete -c $PRODUCT
+		$SNAP/bin/solr-server stop
+	fi
+}
+
+function enable_suggested_search() {
+	# modify solrconfig for having suggestion feature when searching
+	NEXTANT_SOLR_CONFIG_FILE=/var/snap/nextcloud/current/nextcloud/extra-apps/$PRODUCT/config/nextant_solrconfig.xml
+	SOLR_CONFIG_FILE=$SNAP_DATA/$PRODUCT/conf/solrconfig.xml
+
+	if [ ! -e $SOLR_CONFIG_FILE ]; then
+		echo "could not find needed file $SOLR_CONFIG_FILE"
+		exit 1
+	fi 
 
 	## XXX (rmescandon): -i option to update over same file is not working in confined mode. Thus, this copy of file is made
 	# Ideally, should be:
 	# sed -i "/<?xml version=\"1.0\" encoding=\"UTF-8\" ?>/a <!DOCTYPE config [\n\t<!ENTITY nextant_component SYSTEM \"$NEXTANT_SOLR_CONFIG_FILE\">\n\t]>" $SOLR_CONFIG_FILE
 	# sed -i "/<\/config>/i &nextant_component;" $SOLR_CONFIG_FILE
 	# but instead:
-	NEXTANT_SOLR_CONFIG_FILE=$NEXTCLOUD_APPS_FOLDER/$PRODUCT/config/nextant_solrconfig.xml
-	SOLR_CONFIG_FILE=$SNAP_DATA/$PRODUCT/conf/solrconfig.xml
 	TMP1_FILE=$SNAP_DATA/$PRODUCT/conf/tmp1.xml
 	TMP2_FILE=$SNAP_DATA/$PRODUCT/conf/tmp2.xml
 	sed "/<\/config>/i &nextant_component;" $SOLR_CONFIG_FILE > $TMP1_FILE
@@ -29,6 +63,39 @@ if [ ! -e $SNAP_DATA/.nextant_configured ]; then
 	mv $TMP2_FILE $SOLR_CONFIG_FILE
 	rm $TMP1_FILE
 
+	# this stop will force solr service to restart, as we wish.
+	$SNAP/bin/solr-server stop
+}
 
-	touch $PRODUCT_DATA/.nextant_configured
+if [ $# -eq 0 ]; then
+	print_usage
+fi
+
+# main
+if [ $# -gt 0 ]; then
+    while true; do  
+    	case "$1" in
+    		-c)
+				create_core
+			;;
+    		-s)
+				enable_suggested_search
+			;;
+			-d)
+				delete_core
+			;;
+			-h)
+				print_usage
+			;;
+			*)
+				if [ "$1" != "" ]; then
+                	print_usage
+                	exit 1
+              	else
+                	break # out-of-args, stop looping
+              	fi
+			;;
+		esac
+		shift
+	done
 fi
