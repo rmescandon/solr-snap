@@ -37,7 +37,7 @@ function create_core() {
 function delete_core() {
 	if [ -e $SNAP_DATA/$PRODUCT ]; then
 		$SNAP/bin/solr delete -c $PRODUCT
-		$SNAP/bin/solr-server stop
+		$SNAP/bin/solr stop
 	fi
 }
 
@@ -64,7 +64,7 @@ function enable_suggested_search() {
 	rm $TMP1_FILE
 
 	# this stop will force solr service to restart, as we wish.
-	$SNAP/bin/solr-server stop
+	$SNAP/bin/solr stop
 }
 
 if [ $# -eq 0 ]; then

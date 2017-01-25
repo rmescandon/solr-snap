@@ -1,0 +1,7 @@
+#!/bin/bash
+
+set -e
+set -x
+
+# create core for nextant by default
+$SNAP/bin/configure-nextant -c
