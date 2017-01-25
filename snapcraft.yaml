@@ -29,7 +29,7 @@ parts:
     source: http://apache.rediris.es/lucene/solr/6.4.0/solr-6.4.0.tgz
     stage-packages: 
       - default-jre-headless
-    prime:
+    stage:
       - -*.txt
       - -example
       - -docs
