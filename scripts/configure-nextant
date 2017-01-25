@@ -1,0 +1,34 @@
+#!/bin/sh
+
+set -e
+set -x
+
+PRODUCT=nextant
+
+# using .nextant_configured file in current snap version data to know if this is first execution
+# and thus it is needed to configure the solr home folder. This will be also executed
+# in case a previous first execution didn't finish projperly
+if [ ! -e $SNAP_DATA/.nextant_configured ]; then
+	# copy configset for nextant to common folder before creating the core in server
+	[ -e $SNAP_DATA/$PRODUCT ]	||	cp -rf $SNAP/server/solr/configsets/basic_configs $SNAP_DATA/$PRODUCT
+
+	# create nextant core
+	$SNAP/bin/solr create -c $PRODUCT -force
+
+	## XXX (rmescandon): -i option to update over same file is not working in confined mode. Thus, this copy of file is made
+	# Ideally, should be:
+	# sed -i "/<?xml version=\"1.0\" encoding=\"UTF-8\" ?>/a <!DOCTYPE config [\n\t<!ENTITY nextant_component SYSTEM \"$NEXTANT_SOLR_CONFIG_FILE\">\n\t]>" $SOLR_CONFIG_FILE
+	# sed -i "/<\/config>/i &nextant_component;" $SOLR_CONFIG_FILE
+	# but instead:
+	NEXTANT_SOLR_CONFIG_FILE=$NEXTCLOUD_APPS_FOLDER/$PRODUCT/config/nextant_solrconfig.xml
+	SOLR_CONFIG_FILE=$SNAP_DATA/$PRODUCT/conf/solrconfig.xml
+	TMP1_FILE=$SNAP_DATA/$PRODUCT/conf/tmp1.xml
+	TMP2_FILE=$SNAP_DATA/$PRODUCT/conf/tmp2.xml
+	sed "/<\/config>/i &nextant_component;" $SOLR_CONFIG_FILE > $TMP1_FILE
+	sed "/<?xml version=\"1.0\" encoding=\"UTF-8\" ?>/a <!DOCTYPE config [\n\t<!ENTITY nextant_component SYSTEM \"$NEXTANT_SOLR_CONFIG_FILE\">\n\t]>" $TMP1_FILE > $TMP2_FILE
+	mv $TMP2_FILE $SOLR_CONFIG_FILE
+	rm $TMP1_FILE
+
+
+	touch $PRODUCT_DATA/.nextant_configured
+fi

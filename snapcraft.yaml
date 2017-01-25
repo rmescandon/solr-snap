@@ -9,33 +9,31 @@ confinement: strict # use 'strict' once you have the right plugs and slots
 
 apps:
   solr:
-    command: solr.wrapper start
-    stop-command: solr.wrapper stop
+    command: solr-server start
+    stop-command: solr-server stop
     daemon: forking
     restart-condition: always
     plugs: [network, network-bind, system-observe]
 
-  ### UCOMMENT next code and comment above one to start as simple daemon instead of forking one
-  # solr:
-  #   command: solr.wrapper start -f
-  #   daemon: simple
-  #   restart-condition: always
-  #   plugs: [network, network-bind, system-observe]
+  configure-nextant:
+    command: configure-nextant
 
 parts:
   solr:
     plugin: dump
-    source: http://apache.rediris.es/lucene/solr/6.3.0/solr-6.3.0.tgz
+    source: http://apache.rediris.es/lucene/solr/6.4.0/solr-6.4.0.tgz
     stage-packages: 
       - default-jre-headless
-      - lsof
-    snap:
+    prime:
       - -*.txt
       - -example
       - -docs
+      - -solr/bin/solr
 
-  solr-wrapper:
+  solr-customizations:
     plugin: dump
-    source: solr
+    source: scripts
     organize:
-      'solr': bin/
+      'custom-solr': bin/solr
+      'solr-server': bin/solr-server
+      'solr.in.sh' : bin/solr.in.sh

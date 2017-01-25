@@ -54,13 +54,6 @@ JAVA_VER_REQ="8"         # For printing in echo
 
 stop_all=false
 
-# for now, we don't support running this script from cygwin due to problems
-# like not having lsof, ps auxww, curl, and awkward directory handling
-if [ "${THIS_OS:0:6}" == "CYGWIN" ]; then
-  echo -e "This script does not support cygwin due to severe limitations and lack of adherence\nto BASH standards, such as lack of lsof, curl, and ps options.\n\nPlease use the native solr.cmd script on Windows!"
-  exit 1
-fi
-
 # Resolve symlinks to this script
 while [ -h "$SOLR_SCRIPT" ] ; do
   ls=`ls -ld "$SOLR_SCRIPT"`
@@ -1322,13 +1315,6 @@ if [ -z "$STOP_PORT" ]; then
   STOP_PORT=`expr $SOLR_PORT - 1000`
 fi
 
-# if [ "$SCRIPT_CMD" == "start" ] || [ "$SCRIPT_CMD" == "restart" ] ; then
-#   if [[ "$(whoami)" == "root" ]] && [[ "$FORCE" == "false" ]] ; then
-#     echo "WARNING: Starting Solr as the root user is a security risk and not considered best practice. Exiting."
-#     echo "         Please consult the Reference Guide. To override this check, start with argument '-force'"
-#     exit 1
-#   fi
-# fi
 
 if [[ "$SCRIPT_CMD" == "start" ]]; then
   # see if Solr is already running

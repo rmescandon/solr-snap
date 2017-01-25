@@ -1,0 +1,34 @@
+#!/bin/sh
+
+set -e
+set -x
+
+#evaluate input params. Default is "start"
+cmd="$1"
+if [ "$cmd" = "" ]; then 
+	cmd="start"
+fi
+
+PRODUCT=solr
+
+JAVA_HOME="$SNAP/usr/lib/jvm/default-java"
+SOLR_INCLUDE="$SNAP/bin/solr.in.sh"
+
+export JAVA_HOME
+export PATH=$PATH:$JAVA_HOME/bin
+export SOLR_INCLUDE
+
+[ -e $SNAP_COMMON/logs ] || mkdir -p $SNAP_COMMON/logs
+
+case "$cmd" in
+	"start")
+		# copy solr.xml to common folder in case it doesn't exit yet
+		[ -e $SNAP_DATA/solr.xml ] ||	cp $SNAP/server/solr/solr.xml $SNAP_DATA
+		
+		$SNAP/bin/solr start -force #forces start as root if needed
+	;;
+	"stop" | "restart")
+		$SNAP/$PRODUCT/bin/solr $cmd -force
+	;;
+	*)
+esac
