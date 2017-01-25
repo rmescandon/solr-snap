@@ -28,7 +28,8 @@ parts:
       - -*.txt
       - -example
       - -docs
-      - -solr/bin/solr
+      - -bin/solr
+      - -bin/solr.in.sh
 
   solr-customizations:
     plugin: dump
