@@ -19,14 +19,6 @@ apps:
     command: configure-nextant
     plugs: [network, network-bind, system-observe]
 
-  # stop:
-  #   command: solr-server stop
-  #   plugs: [network, network-bind, system-observe]
-
-  # start:
-  #   command: solr-server start
-  #   plugs: [network, network-bind, system-observe]
-
 hooks:
   configure:
     plugs: [network, network-bind, system-observe]
