@@ -1,5 +1,5 @@
 name: solr
-version: 0.1
+version: 6.5.1
 summary: Starts up solr as forking daemon
 description: |
   Solr server as forking daemon. Additionally exposes app to configure Solr 
@@ -26,7 +26,7 @@ hooks:
 parts:
   solr:
     plugin: dump
-    source: http://apache.rediris.es/lucene/solr/6.4.0/solr-6.4.0.tgz
+    source: http://apache.rediris.es/lucene/solr/6.5.1/solr-6.5.1.tgz
     stage-packages: 
       - default-jre-headless
     stage:
